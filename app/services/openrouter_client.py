@@ -8,9 +8,9 @@ class OpenRouterClient:
 	def __init__(self, client: httpx.AsyncClient):
 		self._client = client
 		self._model = settings.OPENROUTER_MODEL
-		self._referer = settings.OPENROUTER_SITE_URL
+		self._referer = str(settings.OPENROUTER_SITE_URL)
 		self._title = settings.OPENROUTER_APP_NAME
-		self._base_url = settings.OPENROUTER_BASE_URL
+		self._base_url = str(settings.OPENROUTER_BASE_URL)
 		self._url = f"{self._base_url}/chat/completions"
 		self._access_token = settings.OPENROUTER_API_KEY
 

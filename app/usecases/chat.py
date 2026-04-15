@@ -6,7 +6,7 @@ class ChatUsecases:
 		self._repo = repo
 		self._client = client
 
-	async def ask(self, user_id: int, prompt: str, system: str | None = None, max_history: int = 0,
+	async def ask(self, user_id: int, prompt: str, system: str | None = None, max_history: int = 5,
 	              temperature: float | None = None):
 		messages: list[ChatMessage] = []
 		if system:
@@ -18,10 +18,10 @@ class ChatUsecases:
 
 		new_prompt = ChatMessage(role="user", content=prompt)
 		messages.append(new_prompt)
+		await self._repo.add_msg(user_id, new_prompt)
 
 		assistant_msg = await self._client.chat(messages, temperature)
 
-		await self._repo.add_msg(user_id, new_prompt)
 		await self._repo.add_msg(user_id, assistant_msg)
 
 		return assistant_msg.content
