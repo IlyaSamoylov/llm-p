@@ -6,13 +6,13 @@ class ChatUsecases:
 		self._repo = repo
 		self._client = client
 
-	async def ask(self, user_id: str, prompt: str, system: str | None = None, max_history: int = 0,
+	async def ask(self, user_id: int, prompt: str, system: str | None = None, max_history: int = 0,
 	              temperature: float | None = None):
 		messages: list[ChatMessage] = []
 		if system:
 			messages.append(ChatMessage(role="system", content=system))
 
-		if max_history > 0:
+		if max_history != 0:
 			chat_history: list[ChatMessage] = await self._repo.get_history(user_id, max_history)
 			messages.extend(chat_history)
 
@@ -25,3 +25,9 @@ class ChatUsecases:
 		await self._repo.add_msg(user_id, assistant_msg)
 
 		return assistant_msg.content
+
+	async def get_history(self, user_id: int) -> list[ChatMessage]:
+		return await self._repo.get_history(user_id)
+
+	async def delete_history(self, user_id):
+		await self._repo.delete_history(user_id)
