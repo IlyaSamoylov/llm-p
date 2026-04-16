@@ -2,6 +2,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import httpx
 
+from app.db.models import User
+from app.db.session import AsyncSessionLocal
+from sqlalchemy.exc import IntegrityError
+
 from app.db.base import Base
 from app.db.session import engine
 from app.api.routes_chat import chat_router
@@ -20,6 +24,14 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
+        # создание пользователя с id=1 для тестов
+        async with AsyncSessionLocal() as session:
+            try:
+                test_user = User(email="test@example.com", password_hash="fakefake", role="user")
+                session.add(test_user)
+                await session.commit()
+            except IntegrityError:
+                await session.rollback()
         yield
 
 def create_app() -> FastAPI:
