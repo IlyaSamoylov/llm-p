@@ -2,7 +2,7 @@ import httpx
 
 from app.core.config import settings
 from app.core.errors import ExternalServiceError
-from app.domain.chat import ChatMessage
+from app.domain.chat import ChatMessageDomain
 
 class OpenRouterClient:
 	def __init__(self, client: httpx.AsyncClient):
@@ -14,7 +14,7 @@ class OpenRouterClient:
 		self._url = f"{self._base_url}/chat/completions"
 		self._access_token = settings.OPENROUTER_API_KEY
 
-	async def chat(self, messages: list[ChatMessage], temperature: float | None = None) -> ChatMessage:
+	async def chat(self, messages: list[ChatMessageDomain], temperature: float | None = None) -> ChatMessageDomain:
 		"""Асинхронный метод отправки сообщения по API в OpenRouter"""
 
 		headers = {
@@ -44,6 +44,6 @@ class OpenRouterClient:
 		try:
 			raw = response.json()
 			message = raw["choices"][0]["message"]
-			return ChatMessage(role=message["role"], content=message["content"])
+			return ChatMessageDomain(role=message["role"], content=message["content"])
 		except (KeyError, IndexError, TypeError, ValueError):
 			raise ExternalServiceError("Invalid response format from OpenRouter")

@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.domain.chat import ChatMessage
 from app.schemas.chat import ChatRequest, ChatResponse, ChatMessageOut
 from app.api.deps import get_current_uid, get_chat_usecase
 from app.usecases.chat import ChatUsecases

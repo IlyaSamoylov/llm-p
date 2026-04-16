@@ -1,34 +1,39 @@
-from app.domain.chat import ChatMessage, BDMessage
-from datetime import datetime, timezone
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, delete
 
-_STORAGE: list[BDMessage] = []
-_ID_SEQ: int = 1
+from app.db.models import ChatMessage
+from app.domain.chat import ChatMessageDomain
 
 class MsgsRepo:
-	def __init__(self):
-		self._storage = _STORAGE
+	def __init__(self, session: AsyncSession):
+		self._session = session
 
-	async def get_history(self, user_id: int, max_history: int = -1) -> list[ChatMessage]:
+	async def get_history(self, user_id: int, max_history: int | None = None) -> list[ChatMessageDomain]:
+		"""Получение истории диалога"""
+		query = (
+			select(ChatMessage)
+		    .where(ChatMessage.user_id == user_id)
+	        .order_by(ChatMessage.created_at.desc()))
 
-		user_msgs: list[BDMessage] = [msg for msg in self._storage if msg.user_id == user_id]
-		user_msgs.sort(key=lambda m: m.created_at)
+		if max_history is not None:
+			query = query.limit(max_history)
 
-		if max_history == -1:
-			selected = user_msgs
-		elif max_history == 0:
-			selected = []
-		else:
-			selected = user_msgs[-max_history:]
+		result = await self._session.execute(query)
 
-		return [ChatMessage(role=m.role, content=m.content) for m in selected]
+		rows = list(result.scalars().all())
+		rows.reverse()
+		return [ChatMessageDomain(role=row.role, content=row.content) for row in rows]
 
-	async def add_msg(self, user_id: int, message: ChatMessage):
-		global _ID_SEQ
-
-		db_msg = BDMessage(id=_ID_SEQ, user_id=user_id, role=message.role,
-                            content=message.content, created_at=datetime.now(timezone.utc))
-		_ID_SEQ += 1
-		self._storage.append(db_msg)
+	async def add_msg(self, user_id: int, message: ChatMessageDomain):
+		"""Добавление сообщения в историю"""
+		msg = ChatMessage(user_id=user_id, role=message.role, content=message.content)
+		self._session.add(msg)
+		await self._session.commit()
 
 	async def delete_history(self, user_id: int):
-		self._storage[:] = [msg for msg in self._storage if msg.user_id != user_id]
+		"""Удаление истории"""
+		await self._session.execute(delete(ChatMessage).where(ChatMessage.user_id == user_id))
+		await self._session.commit()
+
+#TODO: с max_history надо чето делать: оно тащится из схемы, через рут, юзкейс и репо - везде разные стандартные значения
+# проверить, что соблюдается логика: max_history = n (всегда >=0) - вернуть n последних сообщений, max_history = None: вернуть все
