@@ -16,14 +16,14 @@ class ChatUsecases:
 			chat_history: list[ChatMessageDomain] = await self._repo.get_history(user_id, max_history)
 			messages.extend(chat_history)
 
-		#TODO: стоит как-то сделать одной транзакцией добавление в историю user-сообщения, получение ответа и добавление его в историю
-
 		new_prompt = ChatMessageDomain(role="user", content=prompt)
 		messages.append(new_prompt)
-		await self._repo.add_msg(user_id, new_prompt)
 
+		# только если получил ответ...
 		assistant_msg = await self._client.chat(messages, temperature)
 
+		# ...пишу в историю запрос и ответ
+		await self._repo.add_msg(user_id, new_prompt)
 		await self._repo.add_msg(user_id, assistant_msg)
 
 		return assistant_msg.content
