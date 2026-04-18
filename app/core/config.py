@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import AnyUrl
+from pydantic import Field
 
 class Settings(BaseSettings):
 	model_config = SettingsConfigDict(env_file=".env",
@@ -10,6 +11,10 @@ class Settings(BaseSettings):
 
 	SQLITE_PATH: str = "./app.db"
 	DATABASE_DRIVER: str = "sqlite+aiosqlite"
+
+	JWT_SECRET: str
+	JWT_ALG: str = "HS256"
+	ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60, gt=0)
 
 	OPENROUTER_API_KEY: str
 	OPENROUTER_BASE_URL: AnyUrl
