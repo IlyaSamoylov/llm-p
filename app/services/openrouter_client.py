@@ -44,6 +44,12 @@ class OpenRouterClient:
 		try:
 			raw = response.json()
 			message = raw["choices"][0]["message"]
-			return ChatMessageDomain(role=message["role"], content=message["content"])
+			content = message.get("content")
+
 		except (KeyError, IndexError, TypeError, ValueError):
 			raise ExternalServiceError("Invalid response format from OpenRouter")
+
+		if not content or not isinstance(content, str):
+			raise ExternalServiceError("LLM returned empty content")
+
+		return ChatMessageDomain(role=message["role"], content=content)

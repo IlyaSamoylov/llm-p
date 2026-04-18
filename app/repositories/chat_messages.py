@@ -34,6 +34,3 @@ class MsgsRepo:
 		"""Удаление истории"""
 		await self._session.execute(delete(ChatMessage).where(ChatMessage.user_id == user_id))
 		await self._session.commit()
-
-#TODO: с max_history надо чето делать: оно тащится из схемы, через рут, юзкейс и репо - везде разные стандартные значения
-# проверить, что соблюдается логика: max_history = n (всегда >=0) - вернуть n последних сообщений, max_history = None: вернуть все
