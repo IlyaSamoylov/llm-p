@@ -5,6 +5,7 @@ from app.db.models import ChatMessage
 from app.domain.chat import ChatMessageDomain
 
 class MsgsRepo:
+	"""Репозиторий чата"""
 	def __init__(self, session: AsyncSession):
 		self._session = session
 

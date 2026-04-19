@@ -3,6 +3,7 @@ from pydantic import AnyUrl
 from pydantic import Field
 
 class Settings(BaseSettings):
+	"""Класс для чтения и хранения конфигурации приложения"""
 	model_config = SettingsConfigDict(env_file=".env",
 	                                  env_prefix="")
 
@@ -24,6 +25,7 @@ class Settings(BaseSettings):
 
 	@property
 	def database_url(self) -> str:
+		"""Формирование строки подключения к базе данных"""
 		return f"{self.DATABASE_DRIVER}:///{self.SQLITE_PATH}"
 
 settings = Settings()

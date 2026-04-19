@@ -3,7 +3,7 @@ from app.core.errors import ResourceConflictError, AuthenticationError, NotFound
 from app.core.security import hash_password, verify_password, create_access_token
 
 class AuthUsecase:
-	"""Бизнес логика регистрации и логина"""
+	"""Бизнес-логика регистрации и авторизации пользователей"""
 	def __init__(self, user_repo: UserRepo):
 		self._user_repo = user_repo
 

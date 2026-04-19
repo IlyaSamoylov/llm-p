@@ -2,12 +2,14 @@ from app.services.openrouter_client import OpenRouterClient
 from app.domain.chat import ChatMessageDomain
 
 class ChatUsecases:
+	"""Класс с бизнес-логикой чата"""
 	def __init__(self, repo, client: OpenRouterClient):
 		self._repo = repo
 		self._client = client
 
 	async def ask(self, user_id: int, prompt: str, system: str | None = None,
 	              max_history: int | None = None, temperature: float | None = None):
+		"""Формирование контекста, вызов LLM и сохранение истории диалога"""
 		messages: list[ChatMessageDomain] = []
 		if system:
 			messages.append(ChatMessageDomain(role="system", content=system))
@@ -29,7 +31,9 @@ class ChatUsecases:
 		return assistant_msg.content
 
 	async def get_history(self, user_id: int) -> list[ChatMessageDomain]:
+		"""Получить историю пользователя по user_id"""
 		return await self._repo.get_history(user_id)
 
 	async def delete_history(self, user_id):
+		"""Удаление истории пользователя"""
 		await self._repo.delete_history(user_id)

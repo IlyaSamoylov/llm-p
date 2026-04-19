@@ -10,6 +10,7 @@ AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_co
 # чтобы включить в sqlite проверку ограничений внешних ключей
 @event.listens_for(engine.sync_engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
+	"""Включение внешних ключей в sqlite"""
 	cursor = dbapi_connection.cursor()
 	cursor.execute("PRAGMA foreign_keys=ON")
 	cursor.close()

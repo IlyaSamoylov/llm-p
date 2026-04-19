@@ -10,6 +10,7 @@ from app.core.config import settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Запуск асинхронного http клиента и создание таблиц бд до запуска приложения"""
     async with httpx.AsyncClient(
         timeout=httpx.Timeout(60.0, connect=5.0),
         limits=httpx.Limits(max_keepalive_connections=5)
@@ -24,12 +25,14 @@ async def lifespan(app: FastAPI):
         yield
 
 def create_app() -> FastAPI:
+    """Создание приложения"""
     app = FastAPI(lifespan=lifespan, title=settings.APP_NAME)
     app.include_router(chat_router)
     app.include_router(auth_router)
 
     @app.get("/health")
     async def health():
+        """Проверка состояния приложения"""
         return {"status": "ok", "env": settings.ENV}
 
     return app

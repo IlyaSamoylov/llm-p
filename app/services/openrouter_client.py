@@ -5,6 +5,7 @@ from app.core.errors import ExternalServiceError
 from app.domain.chat import ChatMessageDomain
 
 class OpenRouterClient:
+	"""Класс клиента OpenRouter"""
 	def __init__(self, client: httpx.AsyncClient):
 		self._client = client
 		self._model = settings.OPENROUTER_MODEL
@@ -37,9 +38,9 @@ class OpenRouterClient:
 			response = await self._client.post(self._url, json=payload, headers=headers)
 			response.raise_for_status()
 		except httpx.HTTPStatusError as e:
-			raise ExternalServiceError(f"OpenRouter error: {e.response.text}")
+			raise ExternalServiceError(f"Ошибка OpenRouter: {e.response.text}")
 		except httpx.RequestError as e:
-			raise ExternalServiceError(f"Connection error: {str(e)}")
+			raise ExternalServiceError(f"Ошибка соединения: {str(e)}")
 
 		try:
 			raw = response.json()
@@ -47,9 +48,9 @@ class OpenRouterClient:
 			content = message.get("content")
 
 		except (KeyError, IndexError, TypeError, ValueError):
-			raise ExternalServiceError("Invalid response format from OpenRouter")
+			raise ExternalServiceError("Неверный формат ответа от OpenRouter")
 
 		if not content or not isinstance(content, str):
-			raise ExternalServiceError("LLM returned empty content")
+			raise ExternalServiceError("Модель вернула пустой ответ")
 
 		return ChatMessageDomain(role=message["role"], content=content)
